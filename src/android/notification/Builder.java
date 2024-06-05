@@ -24,16 +24,21 @@ package de.appplant.cordova.plugin.notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationCompat.MessagingStyle.Message;
+import androidx.core.content.ContextCompat;
 import androidx.media.app.NotificationCompat.MediaStyle;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.app.NotificationManager;
 import android.service.notification.StatusBarNotification;
 import android.os.Build;
+import android.util.Log;
 
 import java.util.List;
 import java.util.Random;
@@ -49,6 +54,13 @@ import static de.appplant.cordova.plugin.notification.Notification.EXTRA_UPDATE;
  * notification specified by JSON object passed from JS side.
  */
 public final class Builder {
+
+    private final String TAG = "Notifications Builder";
+    // Get the default notification icon and color from the manifest
+    public final static String NOTIFICATION_ICON_KEY = "com.google.firebase.messaging.default_notification_icon";
+    public final static String NOTIFICATION_COLOR_KEY = "com.google.firebase.messaging.default_notification_color";
+    private int defaultNotificationIcon;
+    private int defaultNotificationColor;
 
     // Application context passed by constructor
     private final Context context;
@@ -116,6 +128,16 @@ public final class Builder {
     public Notification build() {
         NotificationCompat.Builder builder;
 
+        try {
+            ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getApplicationContext().getPackageName(), PackageManager.GET_META_DATA);
+            defaultNotificationIcon = ai.metaData.getInt(NOTIFICATION_ICON_KEY, ai.icon);
+            defaultNotificationColor = ContextCompat.getColor(context, ai.metaData.getInt(NOTIFICATION_COLOR_KEY));
+        }  catch (PackageManager.NameNotFoundException e) {
+            Log.d(TAG, "Failed to load meta-data", e);
+        } catch(Resources.NotFoundException e) {
+            Log.d(TAG, "Failed to load notification color", e);
+        }
+
         if (options.isSilent()) {
             return new Notification(context, options);
         }
@@ -145,7 +167,9 @@ public final class Builder {
                 .setGroup(options.getGroup())
                 .setGroupSummary(options.getGroupSummary())
                 .setTimeoutAfter(options.getTimeout())
-                .setLights(options.getLedColor(), options.getLedOn(), options.getLedOff());
+                .setLights(options.getLedColor(), options.getLedOn(), options.getLedOff())
+                .setSmallIcon(defaultNotificationIcon)
+                .setColor(defaultNotificationColor);
 
         if (sound != Uri.EMPTY && !isUpdate()) {
             builder.setSound(sound);
@@ -159,7 +183,6 @@ public final class Builder {
         }
 
         if (options.hasLargeIcon()) {
-            builder.setSmallIcon(options.getSmallIcon());
 
             Bitmap largeIcon = options.getLargeIcon();
 
@@ -168,8 +191,6 @@ public final class Builder {
             }
 
             builder.setLargeIcon(largeIcon);
-        } else {
-            builder.setSmallIcon(options.getSmallIcon());
         }
 
         applyStyle(builder);

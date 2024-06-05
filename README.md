@@ -15,15 +15,17 @@ We created this fork because we needed to include the following modifications in
 | - | Fix crash with target SDK 31 |
 | - | Declare SCHEDULE_EXACT_ALARM permission |
 | - | Fix click notifications in Android 12 |
+| - | Inexact alarms will be scheduled in Android if 'Alarms & reminders' setting is disabled |
+| - | Add new methods to check permissions and open native settings |
 
 It also includes some commits that are in master and haven't been released.
 
-You can see all the changes here: [0.9.0-beta.3...moodlemobile:v0.9.0-moodle.11](https://github.com/katzer/cordova-plugin-local-notifications/compare/0.9.0-beta.3...moodlemobile:v0.9.0-moodle.11)
+You can see all the changes here: [0.9.0-beta.3...moodlemobile:v0.9.0-moodle.12](https://github.com/katzer/cordova-plugin-local-notifications/compare/0.9.0-beta.3...moodlemobile:v0.9.0-moodle.12)
 
 ## Installation
 
 You can install this package using the [original installation instructions](https://github.com/katzer/cordova-plugin-local-notifications#installation), but installing this package instead:
 
 ```sh
-cordova plugin add @moodlehq/cordova-plugin-local-notification@0.9.0-moodle.11
+cordova plugin add @moodlehq/cordova-plugin-local-notification@0.9.0-moodle.12
 ```
